@@ -1,4 +1,6 @@
-import type { TransactionGroup, TransactionItem } from "@/pwa/modules/home/hooks/useHomeData";
+import Link from "next/link";
+import type { TransactionGroup } from "@/pwa/modules/home/hooks/useHomeData";
+import { getCategoryVisual } from "@/pwa/modules/home/componentes/categoryVisual";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -9,24 +11,6 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
   hour: "2-digit",
   minute: "2-digit",
 });
-
-const CATEGORY_ICONS: { match: RegExp; icon: string; tone: string }[] = [
-  { match: /restaur|bar|food|refei/i, icon: "restaurant", tone: "bg-error-container text-error" },
-  { match: /transport|uber|taxi|combust/i, icon: "directions_car", tone: "bg-surface-container-high text-on-surface" },
-  { match: /pix|transfer/i, icon: "bolt", tone: "bg-secondary-container text-secondary" },
-  { match: /market|mercado|supermerc|grocer/i, icon: "shopping_cart", tone: "bg-primary-fixed text-primary" },
-  { match: /stream|netflix|assinatura|subscription/i, icon: "smart_display", tone: "bg-tertiary-fixed text-tertiary" },
-  { match: /salário|salary|income|renda/i, icon: "payments", tone: "bg-secondary-container text-secondary" },
-];
-
-function getCategoryVisual(transaction: TransactionItem) {
-  const haystack = `${transaction.category ?? ""} ${transaction.description}`;
-  const match = CATEGORY_ICONS.find((entry) => entry.match.test(haystack));
-  if (match) return match;
-  return transaction.type === "CREDIT"
-    ? { icon: "call_received", tone: "bg-secondary-container text-secondary" }
-    : { icon: "receipt_long", tone: "bg-surface-container-high text-on-surface" };
-}
 
 interface RecentTransactionsProps {
   groups: TransactionGroup[];
@@ -62,9 +46,10 @@ export function RecentTransactions({ groups }: RecentTransactionsProps) {
               {group.items.map((transaction) => {
                 const visual = getCategoryVisual(transaction);
                 return (
-                  <div
+                  <Link
                     key={transaction.id}
-                    className="flex items-center justify-between py-1"
+                    href={`/app/home/transacao/${transaction.id}`}
+                    className="flex items-center justify-between py-1 -mx-1 px-1 rounded-lg hover:bg-surface-container-low active:scale-[0.99] transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div
@@ -91,7 +76,7 @@ export function RecentTransactions({ groups }: RecentTransactionsProps) {
                       {transaction.type === "CREDIT" ? "+ " : "- "}
                       {currencyFormatter.format(Math.abs(transaction.amount))}
                     </span>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
