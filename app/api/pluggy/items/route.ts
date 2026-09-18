@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase-admin";
+import { getDb } from "@/lib/firebase-admin";
 import { isOwner } from "@/lib/pluggy";
 
 export async function POST(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "owner ou itemId inválido" }, { status: 400 });
   }
 
-  await db
+  await getDb()
     .collection("pluggyItems")
     .doc(itemId)
     .set({
