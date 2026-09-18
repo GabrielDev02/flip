@@ -19,8 +19,149 @@
   }
 }
 
+/* Material 3 baseline palette used by the pwa/home design */
+@theme {
+  --color-secondary-container: #82f5c1;
+  --color-secondary: #006c4a;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-on-secondary-fixed: #002114;
+  --color-surface-container-highest: #e5e2e1;
+  --color-primary-container: #2563eb;
+  --color-surface-variant: #e5e2e1;
+  --color-surface-dim: #dcd9d9;
+  --color-on-primary-fixed: #00174b;
+  --color-on-tertiary-fixed-variant: #92002a;
+  --color-on-primary-container: #eeefff;
+  --color-tertiary-fixed: #ffdadb;
+  --color-primary: #004ac6;
+  --color-surface-tint: #0053db;
+  --color-on-error: #ffffff;
+  --color-on-secondary-fixed-variant: #005137;
+  --color-on-primary: #ffffff;
+  --color-on-error-container: #93000a;
+  --color-on-surface-variant: #434655;
+  --color-on-secondary: #ffffff;
+  --color-inverse-on-surface: #f3f0ef;
+  --color-error: #ba1a1a;
+  --color-outline-variant: #c3c6d7;
+  --color-secondary-fixed: #85f8c4;
+  --color-surface-container: #f0eded;
+  --color-tertiary-container: #d22348;
+  --color-surface: #fcf9f8;
+  --color-primary-fixed: #dbe1ff;
+  --color-surface-bright: #fcf9f8;
+  --color-outline: #737686;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-secondary-container: #00714e;
+  --color-surface-container-high: #eae7e7;
+  --color-on-background: #1c1b1b;
+  --color-inverse-primary: #b4c5ff;
+  --color-tertiary-fixed-dim: #ffb2b7;
+  --color-secondary-fixed-dim: #68dba9;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-on-tertiary-container: #ffecec;
+  --color-on-surface: #1c1b1b;
+  --color-surface-container-low: #f6f3f2;
+  --color-on-tertiary-fixed: #40000d;
+  --color-error-container: #ffdad6;
+  --color-inverse-surface: #313030;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary: #ad0033;
+
+  --spacing-margin: 1.25rem;
+  --spacing-gutter: 1rem;
+  --spacing-space-xl: 2rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-xs: 0.25rem;
+
+  --font-display-sans: var(--font-plus-jakarta-sans), "Plus Jakarta Sans", sans-serif;
+
+  --text-label-sm: 11px;
+  --text-label-sm--line-height: 14px;
+  --text-label-sm--letter-spacing: 0.03em;
+  --text-label-sm--font-weight: 500;
+
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.02em;
+  --text-label-md--font-weight: 600;
+
+  --text-label-lg: 14px;
+  --text-label-lg--line-height: 20px;
+  --text-label-lg--letter-spacing: 0.01em;
+  --text-label-lg--font-weight: 600;
+
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-body-sm--font-weight: 400;
+
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--font-weight: 400;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-body-lg--letter-spacing: -0.005em;
+  --text-body-lg--font-weight: 400;
+
+  --text-headline-sm: 18px;
+  --text-headline-sm--line-height: 24px;
+  --text-headline-sm--letter-spacing: -0.01em;
+  --text-headline-sm--font-weight: 600;
+
+  --text-headline-md: 22px;
+  --text-headline-md--line-height: 28px;
+  --text-headline-md--letter-spacing: -0.015em;
+  --text-headline-md--font-weight: 700;
+
+  --text-headline-lg: 28px;
+  --text-headline-lg--line-height: 36px;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 700;
+
+  --text-display: 36px;
+  --text-display--line-height: 44px;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 800;
+
+  --text-balance-numeral: 32px;
+  --text-balance-numeral--line-height: 40px;
+  --text-balance-numeral--letter-spacing: -0.03em;
+  --text-balance-numeral--font-weight: 700;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.font-pwa {
+  font-family: var(--font-display-sans);
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
 }
