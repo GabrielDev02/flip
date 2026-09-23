@@ -21,7 +21,8 @@ interface PushState {
 let state: PushState = { status: "loading", isBusy: false };
 const SERVER_STATE: PushState = { status: "loading", isBusy: false };
 const listeners = new Set<() => void>();
-let initPromise: Promise<void> | null = null;
+let initPromise: Promise<PushSubscription | null> | null = null;
+let hasResynced = false;
 
 function setState(patch: Partial<PushState>) {
   state = { ...state, ...patch };
@@ -48,11 +49,11 @@ function isStandalone() {
   return window.matchMedia("(display-mode: standalone)").matches;
 }
 
-async function init() {
+async function init(): Promise<PushSubscription | null> {
   const supported = "serviceWorker" in navigator && "PushManager" in window;
   if (!supported) {
     setState({ status: isIOS() && !isStandalone() ? "needs-install" : "unsupported" });
-    return;
+    return null;
   }
   const registration = await navigator.serviceWorker.register("/sw.js", {
     scope: "/",
@@ -61,6 +62,15 @@ async function init() {
   const subscription = await registration.pushManager.getSubscription();
   if (Notification.permission === "denied") setState({ status: "denied" });
   else setState({ status: subscription ? "on" : "off" });
+  return subscription;
+}
+
+function postSubscription(owner: Owner, subscription: PushSubscription, silent: boolean) {
+  return fetch("/api/push/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ owner, subscription: subscription.toJSON(), silent }),
+  });
 }
 
 export function usePushNotifications(owner: Owner) {
@@ -71,8 +81,18 @@ export function usePushNotifications(owner: Owner) {
   );
 
   useEffect(() => {
-    initPromise ??= init().catch(() => setState({ status: "unsupported" }));
-  }, []);
+    initPromise ??= init().catch(() => {
+      setState({ status: "unsupported" });
+      return null;
+    });
+    // The browser may hold a subscription the server never stored (e.g. a failed
+    // first save), which would look "on" but never receive pushes. Re-send it once.
+    initPromise.then((subscription) => {
+      if (!subscription || hasResynced) return;
+      hasResynced = true;
+      postSubscription(owner, subscription, true).catch(() => {});
+    });
+  }, [owner]);
 
   const enable = useCallback(async () => {
     setState({ isBusy: true });
@@ -88,11 +108,7 @@ export function usePushNotifications(owner: Owner) {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
       });
-      const res = await fetch("/api/push/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ owner, subscription: subscription.toJSON() }),
-      });
+      const res = await postSubscription(owner, subscription, false);
       if (!res.ok) {
         await subscription.unsubscribe();
         const data = await res.json().catch(() => null);

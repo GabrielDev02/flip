@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const owner = body?.owner;
   const subscription = body?.subscription;
+  // Silent re-sync from app start: store it without the welcome push
+  const silent = body?.silent === true;
 
   if (!isOwner(owner) || !isPushSubscription(subscription)) {
     return NextResponse.json({ error: "owner ou inscrição inválida" }, { status: 400 });
@@ -18,6 +20,7 @@ export async function POST(request: NextRequest) {
 
   try {
     await saveSubscription(owner, subscription);
+    if (silent) return NextResponse.json({ ok: true });
     // Confirms end-to-end delivery right away
     await sendPushToOwner(owner, {
       title: OWNER_NAMES[owner]

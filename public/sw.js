@@ -22,7 +22,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title || "Gastos", {
       body: data.body,
       icon: "/manifest-icons/192",
-      badge: "/manifest-icons/192",
+      badge: "/manifest-icons/badge",
       tag: data.tag,
       vibrate: [100, 50, 100],
       data: { url: data.url || "/app/home" },
