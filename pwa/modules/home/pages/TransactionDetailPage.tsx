@@ -145,15 +145,6 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
     const next = !shared;
     setShared(next);
     saveMeta({ shared: next });
-
-    // TEMPORARY: push test, remove together with app/api/push/test
-    if (next) {
-      fetch("/api/push/test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ owner, description: transaction?.description }),
-      }).catch(() => {});
-    }
   }
 
   function handleNoteBlur() {

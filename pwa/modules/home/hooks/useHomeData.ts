@@ -64,6 +64,15 @@ interface HomeData {
   transactionGroups: TransactionGroup[];
 }
 
+// Money moving between the user's own pockets, not real income or spending:
+// savings box ("caixinha") transfers, and card bill payments (card purchases
+// are already counted as spending, so the payment would count them twice).
+const INTERNAL_MOVEMENT_CATEGORIES = new Set(["Transfer - Internal", "Credit card payment"]);
+
+export function isInternalMovement(transaction: Pick<Transaction, "category">): boolean {
+  return transaction.category !== null && INTERNAL_MOVEMENT_CATEGORIES.has(transaction.category);
+}
+
 interface CachedHome {
   accounts: Account[];
   nextAutoSyncAt: string | null;
@@ -161,7 +170,9 @@ export function useHomeData(owner: Owner) {
       .filter((transaction) => {
         const date = new Date(transaction.date);
         return (
-          date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
+          !isInternalMovement(transaction) &&
+          date.getMonth() === now.getMonth() &&
+          date.getFullYear() === now.getFullYear()
         );
       })
       .reduce(

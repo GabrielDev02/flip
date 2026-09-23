@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
-import { useHomeData, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
+import { isInternalMovement, useHomeData, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
 import { TopBar } from "@/pwa/modules/home/componentes/TopBar";
 import { BottomNav } from "@/pwa/modules/home/componentes/BottomNav";
 import { MonthSummaryCard } from "@/pwa/modules/transacoes/componentes/MonthSummaryCard";
@@ -72,8 +72,10 @@ export function TransactionsPage({ owner }: TransactionsPageProps) {
   const groups = useMemo(() => groupByDay(filtered), [filtered]);
 
   const summary = useMemo(() => {
-    const credits = filtered.filter((entry) => entry.type === "CREDIT");
-    const debits = filtered.filter((entry) => entry.type === "DEBIT");
+    // Internal movements stay in the list but don't count as income or spending
+    const counted = filtered.filter((entry) => !isInternalMovement(entry));
+    const credits = counted.filter((entry) => entry.type === "CREDIT");
+    const debits = counted.filter((entry) => entry.type === "DEBIT");
     const sum = (list: typeof filtered) =>
       list.reduce((total, entry) => total + Math.abs(entry.amount), 0);
     return {

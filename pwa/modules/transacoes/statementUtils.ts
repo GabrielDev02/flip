@@ -1,4 +1,8 @@
-import type { Account, Transaction } from "@/pwa/modules/home/hooks/useHomeData";
+import {
+  isInternalMovement,
+  type Account,
+  type Transaction,
+} from "@/pwa/modules/home/hooks/useHomeData";
 import { getCategoryLabel } from "@/pwa/modules/transacoes/componentes/statementVisual";
 
 const MONTH_NAMES = [
@@ -109,7 +113,7 @@ export function isInMonth(entry: StatementEntry, { year, month }: MonthKey): boo
 function normalize(value: string): string {
   return value
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 }
 
@@ -189,7 +193,7 @@ export function groupByDay(entries: StatementEntry[]): StatementGroup[] {
       groups.set(key, group);
     }
     group.items.push(entry);
-    group.net += signedAmount(entry);
+    if (!isInternalMovement(entry)) group.net += signedAmount(entry);
   }
   return Array.from(groups.values());
 }
@@ -209,7 +213,7 @@ export function downloadStatementCsv(entries: StatementEntry[], month: MonthKey)
     signedAmount(entry).toFixed(2).replace(".", ","),
   ]);
   // BOM + ";" so Excel pt-BR opens it with accents and columns intact
-  const csv = "﻿" + [header, ...rows].map((row) => row.map(csvCell).join(";")).join("\n");
+  const csv = "\uFEFF" + [header, ...rows].map((row) => row.map(csvCell).join(";")).join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");
   link.href = url;
