@@ -114,7 +114,7 @@ export function TransactionsPage({ owner }: TransactionsPageProps) {
 
   return (
     <div className="font-pwa bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col">
-      <TopBar title="Transações" />
+      <TopBar owner={owner} title="Transações" />
       <main className="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface px-margin">
         <div className="flex flex-col w-full space-y-4">
           <div className="flex items-center justify-between pt-1">

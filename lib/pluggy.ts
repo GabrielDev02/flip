@@ -5,6 +5,12 @@ export type Owner = "gabriel" | "parceiro";
 
 export const OWNERS: Owner[] = ["gabriel", "parceiro"];
 
+// First names used to personalize notifications; null falls back to a generic message.
+export const OWNER_NAMES: Record<Owner, string | null> = {
+  gabriel: "Gabriel",
+  parceiro: null,
+};
+
 export function isOwner(value: unknown): value is Owner {
   return typeof value === "string" && OWNERS.includes(value as Owner);
 }
@@ -32,4 +38,11 @@ export function getItemId(owner: Owner): string {
     throw new Error(`itemId do Pluggy para "${owner}" não configurado`);
   }
   return itemId;
+}
+
+export function getOwnerByItemId(itemId: string): Owner | null {
+  return (
+    OWNERS.find((owner) => process.env[`PLUGGY_ITEM_ID_${owner.toUpperCase()}`] === itemId) ??
+    null
+  );
 }

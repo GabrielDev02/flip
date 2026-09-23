@@ -10,6 +10,7 @@ import { BankAccountsScroll } from "@/pwa/modules/home/componentes/BankAccountsS
 import { DebtsScroll } from "@/pwa/modules/home/componentes/DebtsScroll";
 import { RecentTransactions } from "@/pwa/modules/home/componentes/RecentTransactions";
 import { BottomNav } from "@/pwa/modules/home/componentes/BottomNav";
+import { NotificationPrompt } from "@/pwa/modules/home/componentes/NotificationPrompt";
 import { HomeSkeleton } from "@/pwa/modules/home/componentes/HomeSkeleton";
 
 interface HomePageProps {
@@ -23,7 +24,7 @@ export function HomePage({ owner, userName }: HomePageProps) {
 
   return (
     <div className="font-pwa bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col">
-      <TopBar />
+      <TopBar owner={owner} />
       <main className="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface px-margin">
         <div className="flex flex-col w-full space-y-5">
           <UserGreeting name={userName} />
@@ -49,6 +50,7 @@ export function HomePage({ owner, userName }: HomePageProps) {
         </div>
       </main>
       <BottomNav />
+      <NotificationPrompt owner={owner} />
     </div>
   );
 }
