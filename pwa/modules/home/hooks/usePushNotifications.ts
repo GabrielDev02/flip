@@ -95,7 +95,8 @@ export function usePushNotifications(owner: Owner) {
       });
       if (!res.ok) {
         await subscription.unsubscribe();
-        throw new Error("Falha ao registrar notificações");
+        const data = await res.json().catch(() => null);
+        throw new Error(`servidor ${res.status}: ${data?.error ?? "falha ao registrar"}`);
       }
       setState({ status: "on" });
       return true;

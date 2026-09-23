@@ -48,8 +48,10 @@ export function NotificationBell({ owner }: NotificationBellProps) {
         try {
           const granted = await enable();
           setHint(granted ? "Notificações ativadas!" : "Permissão não concedida.");
-        } catch {
-          setHint("Não foi possível ativar as notificações.");
+        } catch (err) {
+          const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+          console.error("Falha ao ativar notificações", err);
+          setHint(`Não foi possível ativar as notificações (${detail}).`);
         }
         return;
     }

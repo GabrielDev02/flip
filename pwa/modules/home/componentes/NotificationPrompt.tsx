@@ -54,8 +54,11 @@ export function NotificationPrompt({ owner }: NotificationPromptProps) {
       const granted = await enable();
       if (granted) setIsDismissed(true);
       else dismiss();
-    } catch {
-      setError("Não foi possível ativar agora. Tente pelo sininho no topo.");
+    } catch (err) {
+      // Surface the browser's reason; push failures are otherwise opaque on phones
+      const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+      console.error("Falha ao ativar notificações", err);
+      setError(`Não foi possível ativar agora (${detail}).`);
     }
   }
 
