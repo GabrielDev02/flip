@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
   try {
     const itemId = getItemId(owner);
     const client = getPluggyClient(owner);
-    const { results: accounts } = await client.fetchAccounts(itemId);
+    const [item, { results: accounts }] = await Promise.all([
+      client.fetchItem(itemId),
+      client.fetchAccounts(itemId),
+    ]);
 
     const accountsWithTransactions = await Promise.all(
       accounts.map(async (account) => {
@@ -20,7 +23,10 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    return NextResponse.json({ accounts: accountsWithTransactions });
+    return NextResponse.json({
+      accounts: accountsWithTransactions,
+      nextAutoSyncAt: item.nextAutoSyncAt,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erro desconhecido";
     return NextResponse.json({ error: message }, { status: 500 });

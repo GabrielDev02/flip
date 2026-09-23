@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCategoryVisual } from "@/pwa/modules/home/componentes/categoryVisual";
 import { TransactionDetailSkeleton } from "@/pwa/modules/home/componentes/TransactionDetailSkeleton";
-import type { Owner } from "@/pwa/modules/home/hooks/useHomeData";
+import { getCachedTransaction, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
 
 interface CreditCardMetadata {
   installmentNumber?: number;
@@ -75,34 +75,32 @@ interface TransactionDetailPageProps {
 
 export function TransactionDetailPage({ transactionId, owner }: TransactionDetailPageProps) {
   const router = useRouter();
-  const [transaction, setTransaction] = useState<TransactionDetail | null>(null);
-  const [account, setAccount] = useState<AccountSummary | null>(null);
+  // The home list already holds the full Pluggy transaction, so reuse it when available.
+  const [cached] = useState(() => getCachedTransaction(owner, transactionId));
+  const [transaction, setTransaction] = useState<TransactionDetail | null>(
+    () => (cached?.transaction as TransactionDetail | undefined) ?? null
+  );
+  const [account, setAccount] = useState<AccountSummary | null>(
+    () => cached?.account ?? null
+  );
   const [note, setNote] = useState("");
   const [shared, setShared] = useState(false);
+  const [isMetaLoaded, setIsMetaLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cached);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
-      setIsLoading(true);
-      setError(null);
+    async function loadTransaction() {
       try {
-        const [txRes, metaRes] = await Promise.all([
-          fetch(`/api/pluggy/transactions/${transactionId}?owner=${owner}`),
-          fetch(`/api/transaction-meta/${transactionId}`),
-        ]);
-        const txData = await txRes.json();
-        if (!txRes.ok) throw new Error(txData.error ?? "Falha ao buscar transação");
-        const metaData = await metaRes.json();
-
+        const res = await fetch(`/api/pluggy/transactions/${transactionId}?owner=${owner}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Falha ao buscar transação");
         if (!cancelled) {
-          setTransaction(txData.transaction);
-          setAccount(txData.account);
-          setNote(metaData.note ?? "");
-          setShared(metaData.shared ?? false);
+          setTransaction(data.transaction);
+          setAccount(data.account);
         }
       } catch (err) {
         if (!cancelled) {
@@ -113,11 +111,27 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
       }
     }
 
-    load();
+    async function loadMeta() {
+      try {
+        const res = await fetch(`/api/transaction-meta/${transactionId}`);
+        const data = await res.json();
+        if (!cancelled && res.ok) {
+          setNote(data.note ?? "");
+          setShared(data.shared ?? false);
+        }
+      } catch {
+        // meta is optional; keep defaults
+      } finally {
+        if (!cancelled) setIsMetaLoaded(true);
+      }
+    }
+
+    if (!cached) loadTransaction();
+    loadMeta();
     return () => {
       cancelled = true;
     };
-  }, [transactionId, owner]);
+  }, [transactionId, owner, cached]);
 
   async function saveMeta(update: { note?: string; shared?: boolean }) {
     await fetch(`/api/transaction-meta/${transactionId}`, {
@@ -288,7 +302,8 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
                   role="switch"
                   aria-checked={shared}
                   onClick={handleToggleShared}
-                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                  disabled={!isMetaLoaded}
+                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 disabled:opacity-50 ${
                     shared ? "bg-primary" : "bg-surface-container-high"
                   }`}
                 >
@@ -333,8 +348,11 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 onBlur={handleNoteBlur}
-                placeholder="Ex: Almoço com cliente na sexta-feira..."
-                className="w-full text-body-sm text-on-surface placeholder-on-surface-variant bg-surface-container-low border border-surface-container-high rounded-xl p-3 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary outline-none resize-none"
+                disabled={!isMetaLoaded}
+                placeholder={
+                  isMetaLoaded ? "Ex: Almoço com cliente na sexta-feira..." : "Carregando..."
+                }
+                className="w-full disabled:opacity-60 text-body-sm text-on-surface placeholder-on-surface-variant bg-surface-container-low border border-surface-container-high rounded-xl p-3 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary outline-none resize-none"
               />
               <button
                 type="button"

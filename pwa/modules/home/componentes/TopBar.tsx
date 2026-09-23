@@ -1,9 +1,13 @@
-export function TopBar() {
+interface TopBarProps {
+  title?: string;
+}
+
+export function TopBar({ title = "Home" }: TopBarProps) {
   return (
     <header className="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
       <div className="h-16 px-margin flex items-center justify-between">
         <div className="flex items-center gap-space-sm">
-          <span className="text-headline-sm text-on-surface">Home</span>
+          <span className="text-headline-sm text-on-surface">{title}</span>
         </div>
         <div className="flex items-center gap-space-sm">
           <button

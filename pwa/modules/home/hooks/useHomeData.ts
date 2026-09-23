@@ -17,16 +17,19 @@ interface BankData {
   reservedBalances: ReservedBalance[] | null;
 }
 
-interface Transaction {
+export interface Transaction {
   id: string;
   date: string;
   description: string;
   type: "DEBIT" | "CREDIT";
   amount: number;
   category: string | null;
+  status?: "PENDING" | "POSTED";
+  paymentData?: { paymentMethod?: string | null } | null;
+  creditCardMetadata?: { installmentNumber?: number; totalInstallments?: number } | null;
 }
 
-interface Account {
+export interface Account {
   id: string;
   name: string;
   type: "BANK" | "CREDIT";
@@ -61,6 +64,27 @@ interface HomeData {
   transactionGroups: TransactionGroup[];
 }
 
+interface CachedHome {
+  accounts: Account[];
+  nextAutoSyncAt: string | null;
+}
+
+// Module-level so it survives client-side navigation between home and detail.
+const homeCache = new Map<Owner, CachedHome>();
+
+export function getCachedTransaction(owner: Owner, transactionId: string) {
+  for (const account of homeCache.get(owner)?.accounts ?? []) {
+    const transaction = account.transactions.find((t) => t.id === transactionId);
+    if (transaction) {
+      return {
+        transaction,
+        account: { id: account.id, name: account.name, type: account.type },
+      };
+    }
+  }
+  return null;
+}
+
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/);
   if (words.length === 1) return words[0].slice(0, 2);
@@ -84,21 +108,31 @@ function groupLabelForDate(date: Date): string {
 }
 
 export function useHomeData(owner: Owner) {
-  const [accounts, setAccounts] = useState<Account[] | null>(null);
+  const [accounts, setAccounts] = useState<Account[] | null>(
+    () => homeCache.get(owner)?.accounts ?? null
+  );
+  const [nextAutoSyncAt, setNextAutoSyncAt] = useState<string | null>(
+    () => homeCache.get(owner)?.nextAutoSyncAt ?? null
+  );
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !homeCache.has(owner));
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      setIsLoading(true);
+      setIsLoading(!homeCache.has(owner));
       setError(null);
       try {
         const res = await fetch(`/api/pluggy/accounts?owner=${owner}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Falha ao buscar dados");
-        if (!cancelled) setAccounts(data.accounts);
+        if (!cancelled) {
+          const next = data.nextAutoSyncAt ?? null;
+          homeCache.set(owner, { accounts: data.accounts, nextAutoSyncAt: next });
+          setAccounts(data.accounts);
+          setNextAutoSyncAt(next);
+        }
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -202,5 +236,5 @@ export function useHomeData(owner: Owner) {
     };
   }, [accounts]);
 
-  return { data, error, isLoading };
+  return { data, error, isLoading, nextAutoSyncAt };
 }

@@ -5,6 +5,7 @@ import { useHomeData, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
 import { TopBar } from "@/pwa/modules/home/componentes/TopBar";
 import { UserGreeting } from "@/pwa/modules/home/componentes/UserGreeting";
 import { BalanceHeroCard } from "@/pwa/modules/home/componentes/BalanceHeroCard";
+import { SyncStatus } from "@/pwa/modules/home/componentes/SyncStatus";
 import { BankAccountsScroll } from "@/pwa/modules/home/componentes/BankAccountsScroll";
 import { DebtsScroll } from "@/pwa/modules/home/componentes/DebtsScroll";
 import { RecentTransactions } from "@/pwa/modules/home/componentes/RecentTransactions";
@@ -17,7 +18,7 @@ interface HomePageProps {
 }
 
 export function HomePage({ owner, userName }: HomePageProps) {
-  const { data, error, isLoading } = useHomeData(owner);
+  const { data, error, isLoading, nextAutoSyncAt } = useHomeData(owner);
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
 
   return (
@@ -39,6 +40,7 @@ export function HomePage({ owner, userName }: HomePageProps) {
                 isHidden={isBalanceHidden}
                 onToggleHidden={() => setIsBalanceHidden((v) => !v)}
               />
+              <SyncStatus nextAutoSyncAt={nextAutoSyncAt} />
               <BankAccountsScroll cards={data.bankCards} isHidden={isBalanceHidden} />
               <DebtsScroll cards={data.debtCards} isHidden={isBalanceHidden} />
               <RecentTransactions groups={data.transactionGroups} />

@@ -21,13 +21,13 @@ export function RecentTransactions({ groups }: RecentTransactionsProps) {
     <section className="flex flex-col space-y-3 pt-1">
       <div className="flex items-center justify-between">
         <h2 className="text-headline-sm text-on-surface">Transações recentes</h2>
-        <a
-          href="#"
+        <Link
+          href="/app/transacoes"
           className="text-label-lg font-semibold text-primary flex items-center gap-1 hover:underline"
         >
           Ver tudo
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-        </a>
+        </Link>
       </div>
 
       {groups.length === 0 ? (
