@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useHomeData, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
+import { useBalanceHidden } from "@/pwa/modules/home/hooks/useBalanceHidden";
 import { TopBar } from "@/pwa/modules/home/componentes/TopBar";
 import { UserGreeting } from "@/pwa/modules/home/componentes/UserGreeting";
 import { BalanceHeroCard } from "@/pwa/modules/home/componentes/BalanceHeroCard";
@@ -19,7 +19,7 @@ interface HomePageProps {
 
 export function HomePage({ owner, userName }: HomePageProps) {
   const { data, error, isLoading, nextAutoSyncAt } = useHomeData(owner);
-  const [isBalanceHidden, setIsBalanceHidden] = useState(false);
+  const [isBalanceHidden, toggleBalanceHidden] = useBalanceHidden();
 
   return (
     <div className="font-pwa bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col">
@@ -38,7 +38,7 @@ export function HomePage({ owner, userName }: HomePageProps) {
                 balance={data.totalBalance}
                 monthlyNet={data.monthlyNet}
                 isHidden={isBalanceHidden}
-                onToggleHidden={() => setIsBalanceHidden((v) => !v)}
+                onToggleHidden={toggleBalanceHidden}
               />
               <SyncStatus nextAutoSyncAt={nextAutoSyncAt} />
               <BankAccountsScroll cards={data.bankCards} isHidden={isBalanceHidden} />
