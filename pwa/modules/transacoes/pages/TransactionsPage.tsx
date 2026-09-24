@@ -2,29 +2,29 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
-import { isInternalMovement, useHomeData, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
-import { TopBar } from "@/pwa/modules/home/componentes/TopBar";
-import { BottomNav } from "@/pwa/modules/home/componentes/BottomNav";
-import { MonthSummaryCard } from "@/pwa/modules/transacoes/componentes/MonthSummaryCard";
-import { StatementList } from "@/pwa/modules/transacoes/componentes/StatementList";
-import { FilterModal } from "@/pwa/modules/transacoes/componentes/FilterModal";
-import { StatementSkeleton } from "@/pwa/modules/transacoes/componentes/StatementSkeleton";
-import { getBankDot } from "@/pwa/modules/transacoes/componentes/statementVisual";
+import { useHomeData } from "@/pwa/modules/home/hooks/useHomeData";
+import { isInternalMovement } from "@/pwa/shared/utils/transactions";
+import type { Owner } from "@/pwa/shared/types/owner";
+import { TopBar } from "@/pwa/shared/componentes/TopBar/TopBar";
+import { BottomNav } from "@/pwa/shared/componentes/BottomNav/BottomNav";
+import { MonthSummaryCard } from "@/pwa/modules/transacoes/componentes/MonthSummaryCard/MonthSummaryCard";
+import { StatementList } from "@/pwa/modules/transacoes/componentes/StatementList/StatementList";
+import { FilterModal } from "@/pwa/modules/transacoes/componentes/FilterModal/FilterModal";
+import { StatementSkeleton } from "@/pwa/modules/transacoes/componentes/StatementSkeleton/StatementSkeleton";
+import { getBankDot } from "@/pwa/modules/transacoes/utils/statementVisual";
 import {
   EMPTY_ADVANCED_FILTERS,
   applyFilters,
   countAdvancedFilters,
-  currentMonth,
   downloadStatementCsv,
-  formatMonthRange,
   groupByDay,
   isInMonth,
   toStatementAccount,
   toStatementEntries,
   type AdvancedFilters,
-  type MonthKey,
   type QuickFilter,
-} from "@/pwa/modules/transacoes/statementUtils";
+} from "@/pwa/modules/transacoes/utils/statementUtils";
+import { currentMonth, formatMonthRange, type MonthKey } from "@/pwa/shared/utils/month";
 
 const pillBase =
   "filter-pill flex items-center px-3.5 h-9 rounded-full flex-shrink-0 active:scale-95 transition-all";

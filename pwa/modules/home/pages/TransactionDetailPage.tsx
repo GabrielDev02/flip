@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getCategoryVisual } from "@/pwa/modules/home/componentes/categoryVisual";
-import { TransactionDetailSkeleton } from "@/pwa/modules/home/componentes/TransactionDetailSkeleton";
-import { getCachedTransaction, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
+import { getCategoryLabel, getCategoryVisual } from "@/pwa/shared/utils/categoryVisual";
+import { TransactionDetailSkeleton } from "@/pwa/modules/home/componentes/TransactionDetailSkeleton/TransactionDetailSkeleton";
+import { getCachedTransaction } from "@/pwa/modules/home/hooks/useHomeData";
+import type { Owner } from "@/pwa/shared/types/owner";
+import { formatCurrency, formatDateTime } from "@/pwa/shared/utils/format";
 
 interface CreditCardMetadata {
   installmentNumber?: number;
@@ -33,18 +35,6 @@ interface AccountSummary {
   name: string;
   type: "BANK" | "CREDIT";
 }
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
-
-const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
-  day: "2-digit",
-  month: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 function getPaymentMethodLabel(transaction: TransactionDetail) {
   if (transaction.creditCardMetadata) {
@@ -166,7 +156,7 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
     if (!transaction || !navigator.share) return;
     await navigator.share({
       title: transaction.description,
-      text: `${transaction.description} — ${currencyFormatter.format(Math.abs(transaction.amount))}`,
+      text: `${transaction.description} — ${formatCurrency(Math.abs(transaction.amount))}`,
     });
   }
 
@@ -218,10 +208,10 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
                       }`}
                     >
                       {isCredit ? "+ " : "- "}
-                      {currencyFormatter.format(Math.abs(transaction.amount))}
+                      {formatCurrency(Math.abs(transaction.amount))}
                     </span>
                     <p className="text-body-sm text-on-surface-variant mt-1.5">
-                      {dateTimeFormatter.format(new Date(transaction.date))} ·{" "}
+                      {formatDateTime(transaction.date)} ·{" "}
                       {payment.label}
                     </p>
                     <div className="mt-3 inline-flex items-center gap-1.5 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-semibold">
@@ -236,7 +226,7 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
                     <div className="py-3 flex items-center justify-between first:pt-1">
                       <span className="text-on-surface-variant font-medium">Categoria</span>
                       <span className="font-semibold text-on-surface">
-                        {transaction.category ?? "Sem categoria"}
+                        {getCategoryLabel(transaction.category)}
                       </span>
                     </div>
                     <div className="py-3 flex items-center justify-between">
@@ -323,7 +313,7 @@ export function TransactionDetailPage({ transactionId, owner }: TransactionDetai
                   <span className="font-bold text-on-surface">
                     Sua parte:{" "}
                     <strong className="text-primary">
-                      {currencyFormatter.format(Math.abs(transaction.amount) / 2)}
+                      {formatCurrency(Math.abs(transaction.amount) / 2)}
                     </strong>
                   </span>
                 </div>

@@ -1,17 +1,17 @@
 "use client";
 
-import { useHomeData, type Owner } from "@/pwa/modules/home/hooks/useHomeData";
-import { useBalanceHidden } from "@/pwa/modules/home/hooks/useBalanceHidden";
-import { TopBar } from "@/pwa/modules/home/componentes/TopBar";
-import { UserGreeting } from "@/pwa/modules/home/componentes/UserGreeting";
-import { BalanceHeroCard } from "@/pwa/modules/home/componentes/BalanceHeroCard";
-import { SyncStatus } from "@/pwa/modules/home/componentes/SyncStatus";
-import { BankAccountsScroll } from "@/pwa/modules/home/componentes/BankAccountsScroll";
-import { DebtsScroll } from "@/pwa/modules/home/componentes/DebtsScroll";
-import { RecentTransactions } from "@/pwa/modules/home/componentes/RecentTransactions";
-import { BottomNav } from "@/pwa/modules/home/componentes/BottomNav";
-import { NotificationPrompt } from "@/pwa/modules/home/componentes/NotificationPrompt";
-import { HomeSkeleton } from "@/pwa/modules/home/componentes/HomeSkeleton";
+import { useHomeData } from "@/pwa/modules/home/hooks/useHomeData";
+import type { Owner } from "@/pwa/shared/types/owner";
+import { useBalanceHidden } from "@/pwa/shared/hooks/useBalanceHidden";
+import { TopBar } from "@/pwa/shared/componentes/TopBar/TopBar";
+import { UserGreeting } from "@/pwa/modules/home/componentes/UserGreeting/UserGreeting";
+import { BalanceHeroCard } from "@/pwa/modules/home/componentes/BalanceHeroCard/BalanceHeroCard";
+import { SyncStatus } from "@/pwa/modules/home/componentes/SyncStatus/SyncStatus";
+import { AccountsScroll } from "@/pwa/modules/home/componentes/AccountsScroll/AccountsScroll";
+import { RecentTransactions } from "@/pwa/modules/home/componentes/RecentTransactions/RecentTransactions";
+import { BottomNav } from "@/pwa/shared/componentes/BottomNav/BottomNav";
+import { NotificationPrompt } from "@/pwa/modules/home/componentes/NotificationPrompt/NotificationPrompt";
+import { HomeSkeleton } from "@/pwa/modules/home/componentes/HomeSkeleton/HomeSkeleton";
 
 interface HomePageProps {
   owner: Owner;
@@ -42,8 +42,19 @@ export function HomePage({ owner, userName }: HomePageProps) {
                 onToggleHidden={toggleBalanceHidden}
               />
               <SyncStatus nextAutoSyncAt={nextAutoSyncAt} />
-              <BankAccountsScroll cards={data.bankCards} isHidden={isBalanceHidden} />
-              <DebtsScroll cards={data.debtCards} isHidden={isBalanceHidden} />
+              <AccountsScroll
+                title="Meus Bancos & Contas"
+                variant="bank"
+                cards={data.bankCards}
+                isHidden={isBalanceHidden}
+              />
+              <AccountsScroll
+                title="Minhas Dívidas"
+                variant="debt"
+                cards={data.debtCards}
+                isHidden={isBalanceHidden}
+                maxVisible={5}
+              />
               <RecentTransactions groups={data.transactionGroups} />
             </>
           )}

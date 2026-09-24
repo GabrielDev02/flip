@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
-export type Owner = "gabriel" | "parceiro";
+import type { Owner } from "@/pwa/shared/types/owner";
+import { daysAgo, getInitials } from "@/pwa/shared/utils/format";
+import { isInternalMovement, signedAmount } from "@/pwa/shared/utils/transactions";
 
 const RECENT_TRANSACTIONS_LIMIT = 8;
 
@@ -51,15 +52,6 @@ interface HomeData {
   transactionGroups: TransactionGroup[];
 }
 
-// Money moving between the user's own pockets, not real income or spending:
-// savings box ("caixinha") transfers, and card bill payments (card purchases
-// are already counted as spending, so the payment would count them twice).
-const INTERNAL_MOVEMENT_CATEGORIES = new Set(["Transfer - Internal", "Credit card payment"]);
-
-export function isInternalMovement(transaction: Pick<Transaction, "category">): boolean {
-  return transaction.category !== null && INTERNAL_MOVEMENT_CATEGORIES.has(transaction.category);
-}
-
 interface CachedHome {
   accounts: Account[];
   nextAutoSyncAt: string | null;
@@ -81,21 +73,10 @@ export function getCachedTransaction(owner: Owner, transactionId: string) {
   return null;
 }
 
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/);
-  if (words.length === 1) return words[0].slice(0, 2);
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
 function groupLabelForDate(date: Date): string {
-  const now = new Date();
-  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diffDays = Math.round(
-    (startOfDay(now).getTime() - startOfDay(date).getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  if (diffDays === 0) return "Hoje";
-  if (diffDays === 1) return "Ontem";
+  const days = daysAgo(date);
+  if (days === 0) return "Hoje";
+  if (days === 1) return "Ontem";
   return new Intl.DateTimeFormat("pt-BR", {
     weekday: "short",
     day: "2-digit",
@@ -162,11 +143,7 @@ export function useHomeData(owner: Owner) {
           date.getFullYear() === now.getFullYear()
         );
       })
-      .reduce(
-        (sum, transaction) =>
-          sum + (transaction.type === "CREDIT" ? transaction.amount : -transaction.amount),
-        0
-      );
+      .reduce((sum, transaction) => sum + signedAmount(transaction), 0);
 
     const bankCards: AccountCard[] = accounts
       .filter((account) => account.type === "BANK")
