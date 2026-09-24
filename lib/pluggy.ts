@@ -3,7 +3,7 @@ import { PluggyClient } from "pluggy-sdk";
 
 export type Owner = "gabriel" | "parceiro";
 
-export const OWNERS: Owner[] = ["gabriel", "parceiro"];
+const OWNERS: Owner[] = ["gabriel", "parceiro"];
 
 // First names used to personalize notifications; null falls back to a generic message.
 export const OWNER_NAMES: Record<Owner, string | null> = {

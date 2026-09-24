@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export type NavPath = "home" | "transacoes" | "metas" | "ajustes";
+type NavPath = "home" | "transacoes" | "metas" | "ajustes";
 
 interface NavItem {
   path: NavPath;

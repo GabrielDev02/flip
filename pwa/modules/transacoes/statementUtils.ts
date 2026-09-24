@@ -157,7 +157,7 @@ export function applyFilters(
   });
 }
 
-export function signedAmount(entry: Transaction): number {
+function signedAmount(entry: Transaction): number {
   return entry.type === "CREDIT" ? Math.abs(entry.amount) : -Math.abs(entry.amount);
 }
 

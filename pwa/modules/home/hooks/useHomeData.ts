@@ -6,17 +6,6 @@ export type Owner = "gabriel" | "parceiro";
 
 const RECENT_TRANSACTIONS_LIMIT = 8;
 
-interface ReservedBalance {
-  name: string | null;
-  identification: string;
-  availableAmounts: { amount: number; currencyCode: string }[];
-}
-
-interface BankData {
-  hasReservedBalance: boolean | null;
-  reservedBalances: ReservedBalance[] | null;
-}
-
 export interface Transaction {
   id: string;
   date: string;
@@ -34,7 +23,6 @@ export interface Account {
   name: string;
   type: "BANK" | "CREDIT";
   balance: number;
-  bankData: BankData | null;
   transactions: Transaction[];
 }
 
@@ -60,7 +48,6 @@ interface HomeData {
   monthlyNet: number;
   bankCards: AccountCard[];
   debtCards: AccountCard[];
-  reserveCards: AccountCard[];
   transactionGroups: TransactionGroup[];
 }
 
@@ -199,18 +186,6 @@ export function useHomeData(owner: Owner) {
         initials: getInitials(account.name),
       }));
 
-    const reserveCards: AccountCard[] = accounts.flatMap((account) =>
-      (account.bankData?.reservedBalances ?? []).map((reserved) => {
-        const label = reserved.name ?? "Caixinha";
-        return {
-          id: reserved.identification,
-          label,
-          amount: reserved.availableAmounts.reduce((sum, a) => sum + a.amount, 0),
-          initials: getInitials(label),
-        };
-      })
-    );
-
     const flattenedTransactions = accounts
       .flatMap((account) =>
         account.transactions.map((transaction) => ({
@@ -242,7 +217,6 @@ export function useHomeData(owner: Owner) {
       monthlyNet,
       bankCards,
       debtCards,
-      reserveCards,
       transactionGroups,
     };
   }, [accounts]);
